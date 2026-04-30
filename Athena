@@ -1,0 +1,34 @@
+```python
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+
+# Φόρτωση Δεδομένων
+data = pd.read_csv('data.csv') # Ιστορικά Δεδομένα
+
+# Προετοιμασία Δεδομένων
+data['Date'] = pd.to_datetime(data['Date'])
+data.set_index('Date', inplace=True)
+
+# Δημιουργία Χαρακτηριστικών
+data['Returns'] = data['Close'].pct_change()
+data['Direction'] = np.where(data['Returns'] > 0, 1, 0)
+
+# Απλή Μηχανική Μάθηση
+model = LinearRegression()
+X = data[['Open', 'High', 'Low', 'Close']].shift(1).dropna()
+y = data['Direction'].shift(-1).dropna()
+
+model.fit(X, y)
+
+# Προβλέψεις
+predictions = model.predict(X)
+
+# Οπτικοποίηση
+plt.figure(figsize=(10,5))
+plt.plot(data.index[1:], predictions, label='Predicted Direction')
+plt.plot(data.index[1:], data['Direction'][1:], label='Actual Direction', alpha=0.5)
+plt.legend()
+plt.show()
+```
